@@ -10,6 +10,9 @@ export function ChatPanel() {
     messages, isLoading, isConnected, sendMessage, clearChat, isPanelOpen 
   } = useChat();
   const [inputValue, setInputValue] = useState("");
+  const [panelWidth, setPanelWidth] = useState(340);
+  const isResizing = useRef(false); 
+
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
 
@@ -35,13 +38,34 @@ export function ChatPanel() {
     }
   };
 
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!isResizing.current) return;
+      const newWidth = window.innerWidth - e.clientX;
+      setPanelWidth(Math.min(Math.max(newWidth, 340), 700)); // min 280, max 700
+    };
+
+    const handleMouseUp = () => {
+      isResizing.current = false;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, []);
+
   return (
     <div className={`chat-panel ${isPanelOpen ? "open" : ""}`} style={{
       position: "fixed",
       right: 0,
       top: 0,
       bottom: 0,
-      width: "340px",
+      width: panelWidth,
       background: COLORS.bg,
       borderLeft: `1px solid ${COLORS.border}`,
       display: "flex",
@@ -51,6 +75,29 @@ export function ChatPanel() {
       transition: "transform 300ms ease-in-out",
     }}>
       {/* Header */}
+      {/* Resize handle */}
+      <div
+        onMouseDown={(e) => {
+          e.preventDefault();
+          isResizing.current = true;
+          document.body.style.cursor = "col-resize";
+          document.body.style.userSelect = "none";
+        }}
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: "4px",
+          cursor: "col-resize",
+          background: "transparent",
+          zIndex: 51,
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.background = COLORS.accent + "40"}
+        onMouseLeave={(e) => {
+          if (!isResizing.current) e.currentTarget.style.background = "transparent";
+        }}
+      />
       <div style={{
         padding: "12px 16px",
         borderBottom: `0.5px solid ${COLORS.border}`,
