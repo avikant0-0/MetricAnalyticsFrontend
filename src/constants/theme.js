@@ -46,4 +46,4 @@ export const LEVEL_COLORS = {
   DEBUG: COLORS.textDim,
 };
 
-export const API_BASE = "http://localhost:8000";
+export const API_BASE = "https://metricanalyticsbackend.onrender.com";
