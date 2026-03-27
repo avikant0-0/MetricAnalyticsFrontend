@@ -81,11 +81,3 @@ The dashboard serves as the data foundation for the AI, featuring:
    ```bash
    npm start
    ```
-
----
-
-## 🧠 Why we built this?
-In modern DevOps, "data fatigue" is real. We built MetricsAnalytics to prove that **the future of observability is conversational**. Instead of being a dashboard expert, you can now be an investigator supported by an AI that understands your entire stack.
-
----
-*Created for the MetricsAnalytics Infrastructure Challenge.*
