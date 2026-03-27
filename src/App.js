@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { COLORS } from "./constants/theme";
 import { injectGlobalStyles } from "./styles/GlobalStyles";
 import { useDashboardData } from "./hooks/useDashboardData";
@@ -9,16 +10,15 @@ import { MetricsSection } from "./features/dashboard/MetricsSection";
 import { LogsSection } from "./features/dashboard/LogsSection";
 import { AlertsSection } from "./features/dashboard/AlertsSection";
 import { ServicesSection } from "./features/dashboard/ServicesSection";
+import { ChatProvider, useChat } from "./context/ChatContext";
+import { ChatPanel } from "./components/chat/ChatPanel";
+import { ChatFullPage } from "./components/chat/ChatFullPage";
 
 // Inject global styles once
 injectGlobalStyles();
 
-export default function App() {
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [activeSection, setActiveSection] = useState("overview");
-  const [mode, setMode] = useState("normal");
-  
-  const { data, connected, lastFetch, fetchData, resetData } = useDashboardData(loggedIn, mode);
+function DashboardContent({ activeSection, setActiveSection, mode, setMode, data, connected, lastFetch, fetchData, onLogout }) {
+  const { isPanelOpen } = useChat();
 
   const renderSection = () => {
     switch (activeSection) {
@@ -39,10 +39,6 @@ export default function App() {
     services: "Service Registry",
   };
 
-  if (!loggedIn) {
-    return <LoginPage onLogin={() => setLoggedIn(true)} />;
-  }
-
   return (
     <div style={{
       display: "flex", width: "100vw", height: "100vh",
@@ -55,10 +51,17 @@ export default function App() {
         connected={connected}
         mode={mode}
         setMode={setMode}
-        onLogout={() => { setLoggedIn(false); resetData(); }}
+        onLogout={onLogout}
       />
 
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <div style={{ 
+        flex: 1, 
+        display: "flex", 
+        flexDirection: "column", 
+        overflow: "hidden",
+        marginRight: isPanelOpen ? "340px" : "0",
+        transition: "margin-right 300ms ease-in-out",
+      }}>
         {/* Top bar */}
         <div style={{
           padding: "14px 28px", borderBottom: `1px solid ${COLORS.border}`,
@@ -107,6 +110,67 @@ export default function App() {
           {renderSection()}
         </div>
       </div>
+
+      <ChatPanel />
     </div>
+  );
+}
+
+function MainApp() {
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [activeSection, setActiveSection] = useState("overview");
+  const [mode, setMode] = useState("normal");
+  
+  const { data, connected, lastFetch, fetchData, resetData } = useDashboardData(loggedIn, mode);
+
+  const handleLogout = () => {
+    setLoggedIn(false);
+    resetData();
+  };
+
+  if (!loggedIn) {
+    return <LoginPage onLogin={() => setLoggedIn(true)} />;
+  }
+
+  return (
+    <ChatProvider currentMode = {mode}>
+    <Routes>
+      <Route path="/" element={
+        <DashboardContent 
+          activeSection={activeSection}
+          setActiveSection={setActiveSection}
+          mode={mode}
+          setMode={setMode}
+          data={data}
+          connected={connected}
+          lastFetch={lastFetch}
+          fetchData={fetchData}
+          onLogout={handleLogout}
+        />
+      } />
+      <Route path="/chat" element={
+        <div style={{ display: "flex", width: "100vw", height: "100vh", background: COLORS.bg }}>
+          <Sidebar 
+            activeSection="chat" 
+            setActiveSection={() => {}} 
+            connected={connected} 
+            mode={mode} 
+            setMode={setMode} 
+            onLogout={handleLogout} 
+          />
+          <ChatFullPage />
+        </div>
+      } />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+    </ChatProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <MainApp />
+    </BrowserRouter>
   );
 }

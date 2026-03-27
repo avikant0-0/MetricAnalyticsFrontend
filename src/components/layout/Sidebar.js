@@ -1,7 +1,10 @@
 import React from "react";
 import { COLORS, MODES } from "../../constants/theme";
+import { useChat } from "../../context/ChatContext";
 
 export function Sidebar({ activeSection, setActiveSection, connected, mode, setMode, onLogout }) {
+  const { isPanelOpen, togglePanel } = useChat();
+  
   const sections = [
     { id: "overview", icon: "⊞", label: "Overview" },
     { id: "metrics", icon: "◈", label: "Metrics" },
@@ -18,7 +21,7 @@ export function Sidebar({ activeSection, setActiveSection, connected, mode, setM
       fontFamily: "'Outfit', sans-serif",
       flexShrink: 0,
     }}>
-      {/* Logo */}
+      {/* Logo ... */}
       <div style={{
         padding: "20px 20px 16px", borderBottom: `1px solid ${COLORS.border}`,
         display: "flex", alignItems: "center", gap: 10,
@@ -29,14 +32,14 @@ export function Sidebar({ activeSection, setActiveSection, connected, mode, setM
           display: "flex", alignItems: "center", justifyContent: "center",
           fontSize: 16, fontWeight: 700, color: COLORS.bg,
           fontFamily: "'JetBrains Mono', monospace",
-        }}>K</div>
+        }}>M</div>
         <div>
           <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.text, letterSpacing: "-0.3px" }}>MetricAnalytics</div>
           <div style={{ fontSize: 10, color: COLORS.textDim, fontFamily: "'JetBrains Mono', monospace" }}>observability</div>
         </div>
       </div>
 
-      {/* Connection status */}
+      {/* Connection status ... */}
       <div style={{
         margin: "16px 16px 4px", padding: "10px 12px",
         borderRadius: 8, background: connected ? COLORS.greenDim + "40" : COLORS.redDim + "40",
@@ -49,7 +52,7 @@ export function Sidebar({ activeSection, setActiveSection, connected, mode, setM
         {connected ? "Backend Connected" : "Backend Offline"}
       </div>
 
-      {/* Mode selector */}
+      {/* Mode selector ... */}
       <div style={{ padding: "12px 16px 8px" }}>
         <div style={{
           fontSize: 10, color: COLORS.textDim, fontWeight: 600,
@@ -80,7 +83,7 @@ export function Sidebar({ activeSection, setActiveSection, connected, mode, setM
 
       <div style={{ borderBottom: `1px solid ${COLORS.border}`, margin: "8px 16px" }} />
 
-      {/* Navigation */}
+      {/* Navigation ... */}
       <div style={{ padding: "8px 12px", flex: 1 }}>
         {sections.map(s => (
           <button
@@ -100,9 +103,30 @@ export function Sidebar({ activeSection, setActiveSection, connected, mode, setM
             {s.label}
           </button>
         ))}
+        
+        {/* Chat Toggle Button */}
+        <button
+          onClick={togglePanel}
+          style={{
+            width: "100%", display: "flex", alignItems: "center", gap: 10,
+            padding: "10px 12px", borderRadius: 8, border: "none",
+            background: isPanelOpen ? COLORS.accent + "22" : "transparent",
+            color: isPanelOpen ? COLORS.accent : COLORS.textDim,
+            fontSize: 13, fontWeight: isPanelOpen ? 600 : 400,
+            cursor: "pointer", fontFamily: "'Outfit', sans-serif",
+            transition: "all 0.15s", textAlign: "left", marginTop: 8,
+          }}
+        >
+          <span style={{ fontSize: 15, width: 20, textAlign: "center" }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+          </span>
+          AI Assistant
+        </button>
       </div>
 
-      {/* Logout */}
+      {/* Logout ... */}
       <div style={{ padding: 16, borderTop: `1px solid ${COLORS.border}` }}>
         <button
           onClick={onLogout}
